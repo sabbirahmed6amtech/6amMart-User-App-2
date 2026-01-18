@@ -108,7 +108,7 @@ class Item {
   List<String>? nutritionsName;
   List<String>? allergiesName;
   List<String>? genericName;
-  String? digitalCode;
+  List<String>? digitalCode;
 
   Item({
     this.id,
@@ -158,11 +158,36 @@ class Item {
     name = json['name'];
     description = json['description'];
     imageFullUrl = json['image_full_url'];
-    digitalCode = json['digital_code'] is List
-        ? (json['digital_code'] as List).isNotEmpty
-              ? json['digital_code'][0]?.toString()
-              : null
-        : json['digital_code']?.toString();
+
+    if (json['digital_code'] != null) {
+      if (json['digital_code'] is List) {
+        digitalCode = (json['digital_code'] as List)
+            .map((e) => e.toString())
+            .toList();
+      } else if (json['digital_code'] is String) {
+        try {
+          String str = json['digital_code'].toString();
+          if (str.startsWith('[')) {
+            str = str.replaceAll(RegExp(r'["\[\]]'), '');
+            digitalCode = str.split(',').map((e) => e.trim()).toList();
+          } else {
+            digitalCode = [json['digital_code'].toString()];
+          }
+        } catch (e) {
+          digitalCode = [json['digital_code'].toString()];
+        }
+      }
+    }
+
+    final itemDetails = json['item_details'];
+    if (itemDetails != null &&
+        itemDetails['digital_code'] is List &&
+        digitalCode == null) {
+      digitalCode = (itemDetails['digital_code'] as List)
+          .map((e) => e.toString())
+          .toList();
+    }
+
     if (json['images_full_url'] != null) {
       imagesFullUrl = [];
       json['images_full_url'].forEach((v) {
