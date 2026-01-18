@@ -15,6 +15,7 @@ class CartModel {
   Item? _item;
   int? _quantityLimit;
   bool? _isLoading;
+  String? _userFillableData;
 
   CartModel(
     int? id,
@@ -29,8 +30,10 @@ class CartModel {
     bool isCampaign,
     int? stock,
     Item? item,
-    int? quantityLimit,
-    {bool isLoading = false}) {
+    int? quantityLimit, {
+    bool isLoading = false,
+    String? userFillableData,
+  }) {
     _id = id;
     _price = price;
     _discountedPrice = discountedPrice;
@@ -45,6 +48,7 @@ class CartModel {
     _item = item;
     _quantityLimit = quantityLimit;
     _isLoading = isLoading;
+    _userFillableData = userFillableData;
   }
 
   int? get id => _id;
@@ -66,6 +70,8 @@ class CartModel {
   // ignore: unnecessary_getters_setters
   bool? get isLoading => _isLoading;
   set isLoading(bool? status) => _isLoading = status;
+  String? get userFillableData => _userFillableData;
+  set userFillableData(String? data) => _userFillableData = data;
 
   CartModel.fromJson(Map<String, dynamic> json) {
     _id = json['cart_id'];
@@ -109,6 +115,7 @@ class CartModel {
       _quantityLimit = int.parse(json['quantity_limit']);
     }
     _isLoading = json['is_loading'] ?? false;
+    _userFillableData = json['user_fillable_data'];
   }
 
   Map<String, dynamic> toJson() {
@@ -133,6 +140,9 @@ class CartModel {
     data['stock'] = _stock;
     data['item'] = _item!.toJson();
     data['quantity_limit'] = _quantityLimit?.toString();
+    if (_userFillableData != null) {
+      data['user_fillable_data'] = _userFillableData;
+    }
     // data['is_loading'] = _isLoading?? false;
     return data;
   }

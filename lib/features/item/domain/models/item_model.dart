@@ -9,12 +9,21 @@ class ItemModel {
   List<Item>? items;
   List<Categories>? categories;
 
-  ItemModel({this.totalSize, this.limit, this.offset, this.items, this.categories});
+  ItemModel({
+    this.totalSize,
+    this.limit,
+    this.offset,
+    this.items,
+    this.categories,
+  });
 
   ItemModel.fromJson(Map<String, dynamic> json) {
     totalSize = json['total_size'];
     limit = json['limit'].toString();
-    offset = (json['offset'] != null && json['offset'].toString().trim().isNotEmpty) ? int.parse(json['offset'].toString()) : null;
+    offset =
+        (json['offset'] != null && json['offset'].toString().trim().isNotEmpty)
+        ? int.parse(json['offset'].toString())
+        : null;
     if (json['products'] != null) {
       items = [];
       json['products'].forEach((v) {
@@ -25,10 +34,12 @@ class ItemModel {
       items = [];
       json['items'].forEach((v) {
         if (v['module_type'] == null ||
-          !Get.find<SplashController>().getModuleConfig(v['module_type']).newVariation! ||
-          v['variations'] == null ||
-          v['variations'].isEmpty ||
-          (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {
+            !Get.find<SplashController>()
+                .getModuleConfig(v['module_type'])
+                .newVariation! ||
+            v['variations'] == null ||
+            v['variations'].isEmpty ||
+            (v['food_variations'] != null && v['food_variations'].isNotEmpty)) {
           items!.add(Item.fromJson(v));
         }
       });
@@ -92,9 +103,12 @@ class Item {
   bool? isStoreHalalActive;
   bool? isHalalItem;
   bool? isPrescriptionRequired;
+  int? isDigital;
+  int? isUserFillable;
   List<String>? nutritionsName;
   List<String>? allergiesName;
   List<String>? genericName;
+  List<String>? digitalCode;
 
   Item({
     this.id,
@@ -131,9 +145,12 @@ class Item {
     this.isStoreHalalActive,
     this.isHalalItem,
     this.isPrescriptionRequired,
+    this.isDigital,
+    this.isUserFillable,
     this.nutritionsName,
     this.allergiesName,
     this.genericName,
+    this.digitalCode,
   });
 
   Item.fromJson(Map<String, dynamic> json) {
@@ -141,10 +158,40 @@ class Item {
     name = json['name'];
     description = json['description'];
     imageFullUrl = json['image_full_url'];
-    if(json['images_full_url'] != null){
+
+    if (json['digital_code'] != null) {
+      if (json['digital_code'] is List) {
+        digitalCode = (json['digital_code'] as List)
+            .map((e) => e.toString())
+            .toList();
+      } else if (json['digital_code'] is String) {
+        try {
+          String str = json['digital_code'].toString();
+          if (str.startsWith('[')) {
+            str = str.replaceAll(RegExp(r'["\[\]]'), '');
+            digitalCode = str.split(',').map((e) => e.trim()).toList();
+          } else {
+            digitalCode = [json['digital_code'].toString()];
+          }
+        } catch (e) {
+          digitalCode = [json['digital_code'].toString()];
+        }
+      }
+    }
+
+    final itemDetails = json['item_details'];
+    if (itemDetails != null &&
+        itemDetails['digital_code'] is List &&
+        digitalCode == null) {
+      digitalCode = (itemDetails['digital_code'] as List)
+          .map((e) => e.toString())
+          .toList();
+    }
+
+    if (json['images_full_url'] != null) {
       imagesFullUrl = [];
       json['images_full_url'].forEach((v) {
-        if(v != null) {
+        if (v != null) {
           imagesFullUrl!.add(v.toString());
         }
       });
@@ -210,6 +257,12 @@ class Item {
     isStoreHalalActive = json['halal_tag_status'] == 1;
     isHalalItem = json['is_halal'] == 1;
     isPrescriptionRequired = json['is_prescription_required'] == 1;
+    isDigital = json['is_digital'] is bool
+        ? (json['is_digital'] == true ? 1 : 0)
+        : json['is_digital'];
+    isUserFillable = json['is_user_fillable'] is bool
+        ? (json['is_user_fillable'] == true ? 1 : 0)
+        : json['is_user_fillable'];
     nutritionsName = json['nutritions_name']?.cast<String>();
     allergiesName = json['allergies_name']?.cast<String>();
     genericName = json['generic_name']?.cast<String>();
@@ -246,6 +299,8 @@ class Item {
     data['available_time_ends'] = availableTimeEnds;
     data['store_id'] = storeId;
     data['store_name'] = storeName;
+    data['is_digital'] = isDigital;
+    data['is_user_fillable'] = isUserFillable;
     data['zone_id'] = zoneId;
     data['schedule_order'] = scheduleOrder;
     data['avg_rating'] = avgRating;
@@ -276,8 +331,8 @@ class CategoryIds {
   CategoryIds({this.id, this.position});
 
   CategoryIds.fromJson(Map<String, dynamic> json) {
-    id = int.tryParse(json['id'].toString())??0;
-    position = int.tryParse(json['position'].toString())??0;
+    id = int.tryParse(json['id'].toString()) ?? 0;
+    position = int.tryParse(json['position'].toString()) ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -315,11 +370,7 @@ class AddOns {
   String? name;
   double? price;
 
-  AddOns({
-    this.id,
-    this.name,
-    this.price,
-  });
+  AddOns({this.id, this.name, this.price});
 
   AddOns.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -366,7 +417,14 @@ class FoodVariation {
   bool? required;
   List<VariationValue>? variationValues;
 
-  FoodVariation({this.name, this.multiSelect, this.min, this.max, this.required, this.variationValues});
+  FoodVariation({
+    this.name,
+    this.multiSelect,
+    this.min,
+    this.max,
+    this.required,
+    this.variationValues,
+  });
 
   FoodVariation.fromJson(Map<String, dynamic> json) {
     if (json['max'] != null) {

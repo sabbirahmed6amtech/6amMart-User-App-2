@@ -22,6 +22,7 @@ class OrderDetailsModel {
   String? imageFullUrl;
   int? isGuest;
   ParcelCancellation? parcelCancellation;
+  String? digitalCode;
 
   OrderDetailsModel({
     this.id,
@@ -44,6 +45,7 @@ class OrderDetailsModel {
     this.imageFullUrl,
     this.isGuest,
     this.parcelCancellation,
+    this.digitalCode,
   });
 
   OrderDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -83,6 +85,7 @@ class OrderDetailsModel {
     imageFullUrl = json['image_full_url'];
     isGuest = json['is_guest'];
     parcelCancellation = json['parcel_cancellation'] != null ? ParcelCancellation.fromJson(json['parcel_cancellation']) : null;
+    digitalCode = json['digital_code'];
   }
 
   Map<String, dynamic> toJson() {
